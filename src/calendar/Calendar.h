@@ -37,10 +37,10 @@ extern const char *JieQi[];
 extern const char *LunarDayName[];
 
 /*! {
-        "正月", "二月", "三月", "四月", "五月", "六月",
-        "七月", "八月", "九月", "十月", "冬月", "腊月",
-        "闰正月", "闰二月", "闰三月", "闰四月", "闰五月", "闰六月",
-        "闰七月", "闰八月", "闰九月", "闰十月", "闰冬月", "闰腊月"
+    "正月", "二月", "三月", "四月", "五月", "六月",
+    "七月", "八月", "九月", "十月", "冬月", "腊月",
+    "闰正月", "闰二月", "闰三月", "闰四月", "闰五月", "闰六月",
+    "闰七月", "闰八月", "闰九月", "闰十月", "闰冬月", "闰腊月"
 }*/
 extern const char *LunarMouthName[];
 
@@ -107,36 +107,18 @@ typedef struct GregorianDateInfo {
 
 /** 阴阳历日期结构体 */
 typedef struct DateInfo {
-    GregorianDateInfo gregorianTimeT;
-    LunarDateInfo lunarTimeT;
+    GregorianDateInfo gregorian_date;
+    LunarDateInfo lunar_date;
 } DateInfo;
 
 /** 日历或日期类型 */
 typedef enum {
-    LunarCalendar,
-    GregorianCalendar,
+    LunarCalendar,          /*!< 农历  */
+    GregorianCalendar,      /*!< 公历 (格里高利历)  */
 } CalendarType;
 
-typedef char* (*DateFormatter)(char *string, DateInfo *date_info);
+typedef char *(*DateFormatter)(char *string, DateInfo *date_info);
 
-
-CALENDAR_API_LOCAL TimeInfo FormatTimestamp(struct timeval origin_time);
-static void ShowNowTime();
-//static COORD GetConsoleCursorPos(int *x, int *y);
-static bool SetConsoleCursorPos(int x, int y);
-static int SetConsoleAttribute();
-
-// 获取当前时间并保存到 TimeInfo
-CALENDAR_API_PUBLIC TimeInfo GetCurTime(TimeInfo *gt);
-
-// 判断公历年是否闰年
-CALENDAR_API_PUBLIC bool IsLeapYear(short year);
-
-// 获取农历总天数
-CALENDAR_API_PUBLIC unsigned short GetLunarTotalDayOfYear(short lunarYear);
-
-// 获取公历日期信息
-CALENDAR_API_PUBLIC int GetLunarDateInfo(const LunarDate_T *_lunarDate, LunarDateInfo *moonDate);
 
 // 获取日期(可输入农历或公历)的详细信息
 CALENDAR_API_PUBLIC DateInfo GetDateInfo(
@@ -146,59 +128,73 @@ CALENDAR_API_PUBLIC DateInfo GetDateInfo(
         unsigned short day,
         unsigned short calendarType,
         short isLeapMonth
-        );
+);
 
+// 获取当前时间并保存到 TimeInfo
+CALENDAR_API_PUBLIC TimeInfo GetCurTime(TimeInfo *gt);
+
+// 判断公历年是否闰年
+CALENDAR_API_PUBLIC bool IsLeapYear(short year);
+
+// 获取农历总天数
+CALENDAR_API_PUBLIC unsigned short GetLunarTotalDayOfYear(short lunar_year);
+
+// 获取农历日期信息
+CALENDAR_API_PUBLIC int GetLunarDateInfo(const LunarDate_T *_lunarDate, LunarDateInfo *lunar_date);
+
+// 格式化日期信息
 CALENDAR_API_PUBLIC char *FormatDateInfo(char *format_string, DateInfo *date_info, DateFormatter formatter);
 
-int CalendarMain();
+// 计算公历日期在年内的序数(距离元旦的天数, 元旦为序数 1)
+CALENDAR_API_PUBLIC ErrorCode GetDayOrdinal(const GregorianDate_T *_gregorianDate, int *ordinalDays);
 
-// 计算公历日期在年内的序数(距离元旦的天数, 元旦为序数0)
-ErrorCode GetDayOrdinal(const GregorianDate_T *_gregorianDate, int *ordinalDays);
-
-ErrorCode GetLunarDayOrdinal(const LunarDate_T *_lunarDateT, int *ordinalDays);
+// 计算农历日期在年内的序数(距离正月初一的天数, 正月初一为序数 1)
+CALENDAR_API_PUBLIC ErrorCode GetLunarDayOrdinal(const LunarDate_T *_lunarDateT, int *ordinalDays);
 
 // 从年内序数计算月、日，参数：年，年内序数，月，日，返回值：0-失败，1-成功
-ErrorCode GetDateBasedOrdinal(short year, int ordinalDays, GregorianDate_T *_gregorianDate);
+CALENDAR_API_PUBLIC ErrorCode GetDateBasedOrdinal(short year, int ordinalDays, GregorianDate_T *_gregorianDate);
 
 // 获取年份对应的干支
-int GetGanZhiOfYear(short _lunarYear, unsigned char *_gan_zhi);
+CALENDAR_API_PUBLIC int GetGanZhiOfYear(short _lunarYear, unsigned char *_gan_zhi);
 
 // 获取月份对应的干支
-unsigned char GetGanZhiOfMonth(unsigned char *_gan_zhi, short _lunarYear, unsigned short _lunarMonth);
+CALENDAR_API_PUBLIC unsigned char GetGanZhiOfMonth(unsigned char *_gan_zhi, short _lunarYear, unsigned short _lunarMonth);
 
 // 获取日期对应的干支
-unsigned char GetGanZhiOfDay(unsigned char *_gan_zhi, const LunarDate_T *_lunarDateT);
+CALENDAR_API_PUBLIC unsigned char GetGanZhiOfDay(unsigned char *_gan_zhi, const LunarDate_T *_lunarDateT);
 
 // 获取时干支
-unsigned char GetGanZhiOfHour(unsigned char *_gan_zhi, const LunarDate_T *_lunarDateT, unsigned short hour, unsigned char dis_zi);
+CALENDAR_API_PUBLIC unsigned char GetGanZhiOfHour(unsigned char *_gan_zhi, const LunarDate_T *_lunarDateT, unsigned short hour, unsigned char dis_zi);
 
 // 公历转农历，参数：公历年、月、日，农历日期结构体，是否为闰月，返回值：0-失败，1-成功
-int GregorianToLunar(const GregorianDate_T *_gregorianDateT, LunarDate_T *_lunarDateT);
+CALENDAR_API_PUBLIC int GregorianToLunar(const GregorianDate_T *_gregorianDateT, LunarDate_T *_lunarDateT);
 
 // 格里高利历转儒略日, 参数：公历日期结构体
-double GregorianToJulianDays(const GregorianDate_T *_gregorianDateT, double *julian_days);
+CALENDAR_API_PUBLIC double GregorianToJulianDays(const GregorianDate_T *_gregorianDateT, double *julian_days);
 
 // 农历转公历，参数：农历年、月、日，是否为闰月，公历年、月、日，返回值：0-失败，1-成功
-int LunarToGregorian(const LunarDate_T *_lunarDateT, GregorianDate_T *_gregorianDateT);
+CALENDAR_API_PUBLIC int LunarToGregorian(const LunarDate_T *_lunarDateT, GregorianDate_T *_gregorianDateT);
 
 // 得到指定年份的节气信息，首个是小寒
-int GetJieQi(short year, unsigned short month, unsigned short jie_qi[2]);
+CALENDAR_API_PUBLIC int GetJieQi(short year, unsigned short month, unsigned short jie_qi[2]);
 
 // 获取农历某一年的闰月情况，参数：农历年，返回值，该年的闰月月份，0表示无闰月
-unsigned short GetLunarLeapMonth(short lunar_year);
+CALENDAR_API_PUBLIC unsigned short GetLunarLeapMonth(short lunar_year);
 
 // 获取农历月的天数，参数：农历年，农历月，是否为闰月，返回值：该农历月的天数，为0代表参数无效
-unsigned short GetLunarDaysOfMonth(short lunar_year, unsigned short lunar_month, bool is_leap_month);
+CALENDAR_API_PUBLIC unsigned short GetLunarDaysOfMonth(short lunar_year, unsigned short lunar_month, bool is_leap_month);
 
 // 计算星期，返回-1表示输入的年月日不正确或者超出年份范围
-short GetDayOfWeek(short year, unsigned short month, unsigned short day);
+CALENDAR_API_PUBLIC short GetDayOfWeek(short year, unsigned short month, unsigned short day);
 
 // 计算公历某个月的天数，返回天数，如果返回0表示年或月有误
-unsigned short GetGreDaysOfMonth(short year, unsigned short month);
+CALENDAR_API_PUBLIC unsigned short GetGreDaysOfMonth(short year, unsigned short month);
 
 // 计算日期在一年内的星期数(默认一周起始为星期一，以1月4号所在的星期为一年的第一周), 参数: 年、月、日、星期的起始星期，返回星期数
-unsigned short GetWeekInYear(const GregorianDate_T *_gregorianDate, unsigned short first_week);
+CALENDAR_API_PUBLIC unsigned short GetWeekInYear(const GregorianDate_T *_gregorianDate, unsigned short first_week);
 
+// 计算两个日期之间的间隔天数
+CALENDAR_API_PUBLIC double CalculateIntervalDays(const GregorianDate_T *from, const GregorianDate_T *to);
 
 #ifdef __cplusplus
 }

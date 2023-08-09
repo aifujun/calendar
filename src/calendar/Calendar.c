@@ -37,6 +37,7 @@ static unsigned short GetGregorianTotalDayOfYear(short year);                   
 static void PreprocessDayOrdinalWithYear(short *year, int *ordinalDays, CalendarType type);
                                                                                     // 将序数索引转换成对应年份年内的天数序数
 static int32_t RemoveDecimals(double digit);
+static TimeInfo FormatTimestamp(struct timeval origin_time);
 
 
 /**
@@ -182,12 +183,12 @@ static unsigned short GetGregorianTotalDayOfYear(short year) {
 
 /**
  * 获取农历一年的总天数
- * @param [in]lunarYear: 年份
+ * @param [in]lunar_year: 年份
  */
-unsigned short GetLunarTotalDayOfYear(short lunarYear) {
+unsigned short GetLunarTotalDayOfYear(short lunar_year) {
     unsigned short total_day = 0;
 
-    UpdateLunarDayOfMonth(lunarYear);
+    UpdateLunarDayOfMonth(lunar_year);
 
     for (short i = 0; i < 13; ++i) {
         total_day += LunarDayOfMonth[i];
@@ -813,6 +814,18 @@ unsigned short GetWeekInYear(const GregorianDate_T *_gregorianDate, unsigned sho
     return week_num;
 }
 
+
+
+/**
+ * 计算两个日期之间的间隔天数
+ * @param from: 起始日期
+ * @param to: 终止日期
+ * @return
+ */
+double CalculateIntervalDays(const GregorianDate_T *from, const GregorianDate_T *to) {
+    return GregorianToJulianDays(to, NULL) - GregorianToJulianDays(from, NULL);
+}
+
 /**
  * 获取当前时间 保存为 LONGTIME 结构体返回
  * @return: LONGTIME结构体
@@ -854,72 +867,13 @@ static TimeInfo FormatTimestamp(struct timeval origin_time){
     return lt;
 }
 
-/**
- * 显示当前时间
- */
-static void ShowNowTime(){
-    TimeInfo lt;
-    while (true){
-        GetCurTime(&lt);
-        // printf("%d-%d-%d %2d:%.2d:%.2d %s\r", lt.year, lt.month, lt.day, lt.hour, lt.minute, lt.second, WeekNameCN[lt.dayOfWeek]);
-
-        Sleep(1000);
-    }
-}
 
 /**
- * 获取控制台光标坐标
- * @param x
- * @param y
+ * 获取公历日期信息
+ * @param _gregorianDate: 公历日期结构
+ * @param sunDate: 公历日期信息
  * @return
  */
-//static COORD GetConsoleCursorPos(int *x, int *y){
-//    COORD pos;
-//    CONSOLE_SCREEN_BUFFER_INFO pBuffer;
-//    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &pBuffer);
-//    *x = pBuffer.dwCursorPosition.X + 1;
-//    *y = pBuffer.dwCursorPosition.Y + 1;
-//    pos.X = (short)(pBuffer.dwCursorPosition.X + 1);
-//    pos.Y = (short)(pBuffer.dwCursorPosition.Y + 1);
-//    return pos;
-//}
-
-/**
- * 移动光标到指定位置
- * @param x
- * @param y
- */
-static bool SetConsoleCursorPos(int x, int y){
-    COORD c;
-    c.X = (short)(x - 1);
-    c.Y = (short)(y - 1);
-    return SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),c);
-}
-
-/**
- * 设置控制台属性
- * @return
- */
-static int SetConsoleAttribute(){
-    // Set output mode to handle virtual terminal sequences
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE){
-        return (int)GetLastError();
-    }
-
-    DWORD dwMode = 0;
-    if (!GetConsoleMode(hOut, &dwMode)){
-        return (int)GetLastError();
-    }
-
-    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    if (!SetConsoleMode(hOut, dwMode)){
-        return (int)GetLastError();
-    }
-
-    return (int)GetLastError();
-}
-
 int GetGregorianDateInfo(const GregorianDate_T *_gregorianDate, GregorianDateInfo *sunDate) {
     int day_ordinal =0;
     GetDayOrdinal(_gregorianDate, &day_ordinal);
@@ -935,23 +889,23 @@ int GetGregorianDateInfo(const GregorianDate_T *_gregorianDate, GregorianDateInf
 }
 
 /**
- * 获取公历日期信息
+ * 获取农历日期信息
  * @param [in]_lunarDate: 农历日期结构
- * @param [out]moonDate: 农历日期信息
- * @return Error code in ErrorCode.h
+ * @param [out]lunar_date: 农历日期信息
+ * @return
  */
-int GetLunarDateInfo(const LunarDate_T *_lunarDate, LunarDateInfo *moonDate) {
+int GetLunarDateInfo(const LunarDate_T *_lunarDate, LunarDateInfo *lunar_date) {
     UpdateLunarDayOfMonth(_lunarDate->year);
 
-    moonDate->year = _lunarDate->year;
-    moonDate->month = _lunarDate->month;
-    moonDate->day = _lunarDate->day;
-    moonDate->isLeapMonth = _lunarDate->isLeapMonth;
-    moonDate->monthDay = LunarDayOfMonth[_lunarDate->month];
+    lunar_date->year = _lunarDate->year;
+    lunar_date->month = _lunarDate->month;
+    lunar_date->day = _lunarDate->day;
+    lunar_date->isLeapMonth = _lunarDate->isLeapMonth;
+    lunar_date->monthDay = LunarDayOfMonth[_lunarDate->month];
 
-    GetGanZhiOfYear(_lunarDate->year, &moonDate->ganZhiYear);
-    GetGanZhiOfMonth(&moonDate->ganZhiMon, _lunarDate->year, _lunarDate->month);
-    GetGanZhiOfDay(&moonDate->ganZhiDay, _lunarDate);
+    GetGanZhiOfYear(_lunarDate->year, &lunar_date->ganZhiYear);
+    GetGanZhiOfMonth(&lunar_date->ganZhiMon, _lunarDate->year, _lunarDate->month);
+    GetGanZhiOfDay(&lunar_date->ganZhiDay, _lunarDate);
 
     return ERR_OK;
 }
@@ -997,8 +951,8 @@ DateInfo GetDateInfo(DateInfo *dateInfo,
         default:
             break;
     }
-    GetLunarDateInfo(&lunar_date_t, &dateInfo->lunarTimeT);
-    GetGregorianDateInfo(&gregorian_date_t, &dateInfo->gregorianTimeT);
+    GetLunarDateInfo(&lunar_date_t, &dateInfo->lunar_date);
+    GetGregorianDateInfo(&gregorian_date_t, &dateInfo->gregorian_date);
 
     return *dateInfo;
 }
@@ -1006,22 +960,22 @@ DateInfo GetDateInfo(DateInfo *dateInfo,
 char *FormatterDefault(char *format_string, DateInfo *date_info) {
     sprintf(format_string,
             "公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s月 %s%s日 %s%s%s",
-            date_info->gregorianTimeT.year,
-            date_info->gregorianTimeT.month,
-            date_info->gregorianTimeT.day,
-            WeekNameCN[date_info->gregorianTimeT.dayOfWeek],
-            date_info->gregorianTimeT.weekOfYear,
-            date_info->gregorianTimeT.dayOrdinalOfYear,
-            TianGan[date_info->lunarTimeT.ganZhiYear >> 4],
-            DiZhi[date_info->lunarTimeT.ganZhiYear & GANZHI_MASK],
-            ShengXiao[date_info->lunarTimeT.ganZhiYear & GANZHI_MASK],
-            TianGan[date_info->lunarTimeT.ganZhiMon >> 4],
-            DiZhi[date_info->lunarTimeT.ganZhiMon & GANZHI_MASK],
-            TianGan[date_info->lunarTimeT.ganZhiDay >> 4],
-            DiZhi[date_info->lunarTimeT.ganZhiDay & GANZHI_MASK],
-            date_info->lunarTimeT.isLeapMonth ? "「闰」" : "",
-            LunarMouthName[date_info->lunarTimeT.month - 1],
-            LunarDayName[date_info->lunarTimeT.day - 1]
+            date_info->gregorian_date.year,
+            date_info->gregorian_date.month,
+            date_info->gregorian_date.day,
+            WeekNameCN[date_info->gregorian_date.dayOfWeek],
+            date_info->gregorian_date.weekOfYear,
+            date_info->gregorian_date.dayOrdinalOfYear,
+            TianGan[date_info->lunar_date.ganZhiYear >> 4],
+            DiZhi[date_info->lunar_date.ganZhiYear & GANZHI_MASK],
+            ShengXiao[date_info->lunar_date.ganZhiYear & GANZHI_MASK],
+            TianGan[date_info->lunar_date.ganZhiMon >> 4],
+            DiZhi[date_info->lunar_date.ganZhiMon & GANZHI_MASK],
+            TianGan[date_info->lunar_date.ganZhiDay >> 4],
+            DiZhi[date_info->lunar_date.ganZhiDay & GANZHI_MASK],
+            date_info->lunar_date.isLeapMonth ? "「闰」" : "",
+            LunarMouthName[date_info->lunar_date.month - 1],
+            LunarDayName[date_info->lunar_date.day - 1]
     );
 
     return format_string;
@@ -1033,27 +987,3 @@ char *FormatDateInfo(char *format_string, DateInfo *date_info, DateFormatter for
     }
     return formatter(format_string, date_info);
 }
-
-
-/**
- * 万年历主界面
- * @return
- */
-int CalendarMain(){
-    int mode = 0;
-    int error_times = 0;
-
-    system("color f0");             //设置为白底
-
-    while (error_times < 5){
-        printf("超级万年历(1840～2100)\n\n");
-        //ShowNowTime();
-        printf("\t\t您的输入：");
-        scanf("%d",&mode);
-        error_times += 1;
-        system("cls");
-    }
-
-    return 0;
-}
-

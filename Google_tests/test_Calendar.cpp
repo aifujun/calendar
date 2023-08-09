@@ -155,3 +155,23 @@ TEST(TestCalendar, test_GetGanZhiOfHour) {
     EXPECT_EQ(0x00, GetGanZhiOfHour(nullptr, &lt, 23, 0));
     EXPECT_EQ(0x80, GetGanZhiOfHour(nullptr, &lt, 23, 1));
 }
+
+TEST(TestCalendar, test_CalculateIntervalDays) {
+    double accuracy = 1.0E-8;   // 精确到毫秒
+    GregorianDate_T from = {0, 0, 0};
+    GregorianDate_T to = {0, 0, 0};
+
+    from = {2020, 2, 15};
+    to = {2023, 5, 12};
+    EXPECT_NEAR(1182, CalculateIntervalDays(&from, &to), accuracy);
+
+    from = {2023, 5, 12};
+    to = {2020, 2, 15};
+    EXPECT_NEAR(-1182, CalculateIntervalDays(&from, &to), accuracy);
+
+    from = {2023, 1, 1};
+    to = {2023, 1, 5};
+    EXPECT_NEAR(4, CalculateIntervalDays(&from, &to), accuracy);
+}
+
+

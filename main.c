@@ -1,26 +1,24 @@
 #include <stdio.h>
 #include <windows.h>
 
-#include "src/calendar/Calendar1.h"
+//#include "src/calendar/Calendar1.h"
+#include "src/calendar/calendar.h"
 #include "src/calendar/internal/festival.h"
 #include "src/calendar/internal/anniversary.h"
-
-#define GANZHI_MASK (0x0F)
-
 
 
 /**
  * 显示当前时间
  */
-void ShowNowTime(){
-    TimeInfo lt;
-    GetCurTime(&lt);
-    printf("%d-%d-%d %2d:%.2d:%.2d %s\n", lt.year, lt.month, lt.day, lt.hour, lt.minute, lt.second, WeekNameCN[lt.dayOfWeek]);
-}
+//void ShowNowTime(){
+//    TimeInfo lt;
+//    GetCurTime(&lt);
+//    printf("%d-%d-%d %2d:%.2d:%.2d %s\n", lt.year, lt.month, lt.day, lt.hour, lt.minute, lt.second, WeekNameCN[lt.dayOfWeek]);
+//}
 
-int HomeWidget() {
-    ShowNowTime();
-}
+//int HomeWidget() {
+//    ShowNowTime();
+//}
 
 /**
  * 万年历主界面
@@ -45,49 +43,36 @@ int CalendarMain(){
 }
 
 
-char* FormatDateProc(char *string, DateInfo *date_info) {
-    TianGan[0] = "q";
-    sprintf(string,
-            "公元 %d年%.2d月%.2d日 %s 第%.2d周 第%d天\n\n农历: %s%s[%s]年 %s%s月 %s%s日 %s%s%s",
-            date_info->gregorian_date.year,
-            date_info->gregorian_date.month,
-            date_info->gregorian_date.day,
-            WeekNameCN[date_info->gregorian_date.dayOfWeek],
-            date_info->gregorian_date.weekOfYear,
-            date_info->gregorian_date.dayOrdinalOfYear,
-            TianGan[date_info->lunar_date.ganZhiYear >> 4],
-            DiZhi[date_info->lunar_date.ganZhiYear & GANZHI_MASK],
-            ShengXiao[date_info->lunar_date.ganZhiYear & GANZHI_MASK],
-            TianGan[date_info->lunar_date.ganZhiMon >> 4],
-            DiZhi[date_info->lunar_date.ganZhiMon & GANZHI_MASK],
-            TianGan[date_info->lunar_date.ganZhiDay >> 4],
-            DiZhi[date_info->lunar_date.ganZhiDay & GANZHI_MASK],
-            date_info->lunar_date.isLeapMonth ? "「闰」" : "",
-            LunarMouthName[date_info->lunar_date.month - 1],
-            LunarDayName[date_info->lunar_date.day - 1]
-    );
-
-    return string;
-}
-
 int run_calendar() {
-    DateInfo dateInfo = {0};
-    char str[256] = {0};
+    DATE_INFO date_info = {0};
+    get_date_info(&date_info, 2023, 9, 21, GregorianCalendar, 0);
 
-    GetDateInfo(&dateInfo, 2023, 9, 21, GregorianCalendar, 0);
-
-    FormatDateInfo(str, &dateInfo, FormatDateProc);
-
-    printf("%s\n", str);
-
-    printf("---%d---\n", GetLunarTotalDayOfYear(2023));
+    printf("公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s月 %s%s日 %s%s%s",
+           date_info.gregorian.year,
+           date_info.gregorian.month,
+           date_info.gregorian.day,
+           WeekNameCN[date_info.gregorian.dayOfWeek],
+           date_info.gregorian.weekOfYear,
+           date_info.gregorian.dayOrdinalOfYear,
+           TianGan[date_info.lunar.ganZhiYear >> 4],
+           DiZhi[date_info.lunar.ganZhiYear & GANZHI_MASK],
+           ShengXiao[date_info.lunar.ganZhiYear & GANZHI_MASK],
+           TianGan[date_info.lunar.ganZhiMon >> 4],
+           DiZhi[date_info.lunar.ganZhiMon & GANZHI_MASK],
+           TianGan[date_info.lunar.ganZhiDay >> 4],
+           DiZhi[date_info.lunar.ganZhiDay & GANZHI_MASK],
+           date_info.lunar.isLeapMonth ? "「闰」" : "",
+           LunarMouthName[date_info.lunar.month - 1],
+           LunarDayName[date_info.lunar.day - 1]
+    );
 
     return 0;
 }
 
 
 void Initialize() {
-    SetConsoleOutputCP(CP_UTF8);
+    // SetConsoleOutputCP(CP_UTF8);
+    system("@chcp 65001");
 }
 
 
@@ -144,35 +129,11 @@ int test_fest() {
 }
 
 
-int test() {
-
-    GregorianDate_T gt = {1900, 1, 1};
-    double jd = 0;
-    GregorianToJulianDays(&gt, &jd);
-    printf("%f\n", jd);
-
-    gt.day = 2;
-    jd = 0;
-    GregorianToJulianDays(&gt, &jd);
-    printf("%f\n", jd);
-
-    gt.year = 1800;
-    gt.month = 1;
-    gt.day = 1;
-    jd = 0;
-    GregorianToJulianDays(&gt, &jd);
-    printf("%f\n", jd);
-
-    return 0;
-}
-
 
 int main(int argc, char **argv) {
     Initialize();
 
-//    run_calendar();
-    test();
-
+    run_calendar();
 
 //    system("pause");
     return 0;

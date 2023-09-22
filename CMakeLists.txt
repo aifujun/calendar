@@ -31,7 +31,7 @@ add_subdirectory(Google_tests)
 
 add_executable(${PROJECT_NAME}
         main.c
-        src/calendar/Calendar1.c
+        src/calendar/calendar.c
         src/calendar/internal/logger.c
         src/calendar/internal/festival.c
         src/calendar/internal/anniversary.c

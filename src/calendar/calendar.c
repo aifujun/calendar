@@ -876,42 +876,31 @@ int get_date_info(DATE_INFO *date, int year, unsigned short month, unsigned shor
 }
 
 
-
-
-/*--------------------------------------------------------------------------------------------------------------------*/
-
-int test(DATE_INFO *date_info) {
-    printf("公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s月 %s%s日 %s%s%s",
-            date_info->gregorian.year,
-            date_info->gregorian.month,
-            date_info->gregorian.day,
-            WeekNameCN[date_info->gregorian.dayOfWeek],
-            date_info->gregorian.weekOfYear,
-            date_info->gregorian.dayOrdinalOfYear,
-            TianGan[date_info->lunar.ganZhiYear >> 4],
-            DiZhi[date_info->lunar.ganZhiYear & GANZHI_MASK],
-            ShengXiao[date_info->lunar.ganZhiYear & GANZHI_MASK],
-            TianGan[date_info->lunar.ganZhiMon >> 4],
-            DiZhi[date_info->lunar.ganZhiMon & GANZHI_MASK],
-            TianGan[date_info->lunar.ganZhiDay >> 4],
-            DiZhi[date_info->lunar.ganZhiDay & GANZHI_MASK],
-            date_info->lunar.isLeapMonth ? "「闰」" : "",
-            LunarMouthName[date_info->lunar.month - 1],
-            LunarDayName[date_info->lunar.day - 1]
-    );
-
-    return 0;
-}
-
-
 /*
 int main(int argc, char **argv) {
     system("@chcp 65001");
 
-    DATE_INFO date = {0};
-    get_date_info(&date, 2023, 9, 21, GregorianCalendar, 0);
+    DATE_INFO date_info = {0};
+    get_date_info(&date_info, 2023, 9, 21, GregorianCalendar, 0);
 
-    test(&date);
+    printf("公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s月 %s%s日 %s%s%s",
+            date_info.gregorian.year,
+            date_info.gregorian.month,
+            date_info.gregorian.day,
+            WeekNameCN[date_info.gregorian.dayOfWeek],
+            date_info.gregorian.weekOfYear,
+            date_info.gregorian.dayOrdinalOfYear,
+            TianGan[date_info.lunar.ganZhiYear >> 4],
+            DiZhi[date_info.lunar.ganZhiYear & GANZHI_MASK],
+            ShengXiao[date_info.lunar.ganZhiYear & GANZHI_MASK],
+            TianGan[date_info.lunar.ganZhiMon >> 4],
+            DiZhi[date_info.lunar.ganZhiMon & GANZHI_MASK],
+            TianGan[date_info.lunar.ganZhiDay >> 4],
+            DiZhi[date_info.lunar.ganZhiDay & GANZHI_MASK],
+            date_info.lunar.isLeapMonth ? "「闰」" : "",
+            LunarMouthName[date_info.lunar.month - 1],
+            LunarDayName[date_info.lunar.day - 1]
+    );
 
     return 0;
 }

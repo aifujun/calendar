@@ -5,6 +5,11 @@
 #include "festival.h"
 #include "logger.h"
 
+/**
+ * 1.“一九”即是冬至，往后到“九九”的每个“九”相差9天，可顺利推算出来，故“数九”信息省略。
+ * 2.所谓三伏天指的「三伏」是指初伏、中伏、末伏三个庚日，其具体日期是按照我国古代的干支法来推算的，以我国农历24节气中的「夏至」后的第三个庚日为初伏，第四个庚日为中伏，「立秋」后第一个庚日为末伏
+ */
+
 
 FESTIVAL ChineseTraditionalFestivals[MAX_TRADITIONAL_FESTIVAL_NUM] = {
         {

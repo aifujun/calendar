@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
+#include <sys/time.h>
 
-//#include "src/calendar/Calendar1.h"
 #include "src/calendar/calendar.h"
 #include "src/calendar/internal/festival.h"
 #include "src/calendar/internal/anniversary.h"
@@ -10,21 +10,43 @@
 /**
  * 显示当前时间
  */
-//void ShowNowTime(){
-//    TimeInfo lt;
-//    GetCurTime(&lt);
-//    printf("%d-%d-%d %2d:%.2d:%.2d %s\n", lt.year, lt.month, lt.day, lt.hour, lt.minute, lt.second, WeekNameCN[lt.dayOfWeek]);
-//}
+void GetCurTime() {
+    FC_TIME now_time = {0};
+    struct timeval tv = {0};
+    struct timezone tz = {0};
+    struct tm time_tm = {0};
 
-//int HomeWidget() {
-//    ShowNowTime();
-//}
+    if (gettimeofday(&tv, &tz) != 0) {
+        printf("获取时间错误");
+    }
+    time_t now_t = tv.tv_sec;
+
+#if defined(_WIN32) || defined(_WIN64)
+    localtime_s(&time_tm, &now_t);
+#elif defined(__linux__)
+    localtime_r(&now_t, &time_tm);
+#endif
+
+    now_time.year = time_tm.tm_year + 1900;
+    now_time.month = time_tm.tm_mon +1;
+    now_time.day = time_tm.tm_mday;
+    now_time.hour = time_tm.tm_hour;
+    now_time.minute = time_tm.tm_min;
+    now_time.second = time_tm.tm_sec;
+    now_time.dayOfWeek = time_tm.tm_wday;
+    now_time.dayOrdinalOfYear = time_tm.tm_yday;
+    now_time.isDST = time_tm.tm_isdst;
+    now_time.millisecond = (int)(tv.tv_usec / 1000);
+    now_time.microsecond = tv.tv_usec - now_time.millisecond * 1000;
+
+    printf("%d-%d-%d %2d:%.2d:%.2d %s\n", now_time.year, now_time.month, now_time.day, now_time.hour, now_time.minute, now_time.second, WeekNameCN[now_time.dayOfWeek]);
+}
 
 /**
  * 万年历主界面
  * @return
  */
-int CalendarMain(){
+int CalendarMainWidget(){
     int mode = 0;
     int error_times = 0;
 
@@ -45,9 +67,9 @@ int CalendarMain(){
 
 int run_calendar() {
     DATE_INFO date_info = {0};
-    get_date_info(&date_info, 2023, 9, 21, GregorianCalendar, 0);
+    get_date_info(&date_info, 2023, 9, 22, GregorianCalendar, 0);
 
-    printf("公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s月 %s%s日 %s%s%s",
+    printf("公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s%s %s%s月 %s%s日\n",
            date_info.gregorian.year,
            date_info.gregorian.month,
            date_info.gregorian.day,
@@ -57,13 +79,13 @@ int run_calendar() {
            TianGan[date_info.lunar.ganZhiYear >> 4],
            DiZhi[date_info.lunar.ganZhiYear & GANZHI_MASK],
            ShengXiao[date_info.lunar.ganZhiYear & GANZHI_MASK],
+           date_info.lunar.isLeapMonth ? "「闰」" : "",
+           LunarMouthName[date_info.lunar.month - 1],
+           LunarDayName[date_info.lunar.day - 1],
            TianGan[date_info.lunar.ganZhiMon >> 4],
            DiZhi[date_info.lunar.ganZhiMon & GANZHI_MASK],
            TianGan[date_info.lunar.ganZhiDay >> 4],
-           DiZhi[date_info.lunar.ganZhiDay & GANZHI_MASK],
-           date_info.lunar.isLeapMonth ? "「闰」" : "",
-           LunarMouthName[date_info.lunar.month - 1],
-           LunarDayName[date_info.lunar.day - 1]
+           DiZhi[date_info.lunar.ganZhiDay & GANZHI_MASK]
     );
 
     return 0;
@@ -72,7 +94,7 @@ int run_calendar() {
 
 void Initialize() {
     // SetConsoleOutputCP(CP_UTF8);
-    system("@chcp 65001");
+    system("@echo off&chcp 65001>nul");
 }
 
 
@@ -132,6 +154,8 @@ int test_fest() {
 
 int main(int argc, char **argv) {
     Initialize();
+
+    GetCurTime();
 
     run_calendar();
 

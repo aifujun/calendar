@@ -7,10 +7,9 @@ project(RunTests)
 
 set(GTest_INCLUDE_DIR include)
 set(GTest_LIBRARY_DIR lib)
+# 当前目录
+set(CUR_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-if (DEFINED OPT_DEBUG)
-    message("CMAKE_CURRENT_SOURCE_DIR:" ${CMAKE_CURRENT_SOURCE_DIR})
-endif()
 
 link_directories(${GTest_LIBRARY_DIR})
 
@@ -29,7 +28,9 @@ link_directories(${GTest_LIBRARY_DIR})
 # Link runTests with what we want to test and the GTest and pthread library
 add_executable(${PROJECT_NAME}
         main.cpp
-        test_Calendar.cpp
+#        test_Calendar1.cpp
+        test_calendar.cpp
+        "${CUR_DIR}/../src/calendar/calendar.c"
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

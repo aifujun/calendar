@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#include "Calendar.h"
+#include "Calendar1.h"
 #include "lunarData.h"
 
 
@@ -531,17 +531,13 @@ double GregorianToJulianDays(const GregorianDate_T *_gregorianDateT, double *jul
     int M = _gregorianDateT->month;
     int D = _gregorianDateT->day;
     int B = 0;
-    double jd = 0;
 
-    if (!julian_days) {
-        julian_days = &jd;
-    }
-    if ((Y > 1582) || (Y == 1582 && M > 10) || (Y == 1582 && M == 10 && D >= 15)) {
-        B = 2 - (int)floor((double)Y / 100) + (int)floor((double)Y / 400);
-    }
     if (_gregorianDateT->month <= 2) {
         Y -= 1;
         M += 12;
+    }
+    if ((Y > 1582) || (Y == 1582 && M > 10) || (Y == 1582 && M == 10 && D >= 15)) {
+        B = 2 - (int)floor((double)Y / 100) + (int)floor((double)Y / 400);
     }
 
     // *julian_days = floor(365.25*(Y+4712)) + floor(30.6*(M+1)) + D + B - 63.5;

@@ -29,7 +29,14 @@ add_subdirectory(Google_tests)
 
 
 
-add_executable(cal
+add_executable(${PROJECT_NAME}
         main.c
-        src/calendar/Calendar.c
+        src/calendar/Calendar1.c
+        src/calendar/internal/logger.c
+        src/calendar/internal/festival.c
+        src/calendar/internal/anniversary.c
+)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        ws2_32
 )

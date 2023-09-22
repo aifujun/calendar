@@ -2,8 +2,8 @@
 #include <cstdint>
 #include "gtest/gtest.h"
 
-#include "../src/calendar/Calendar.h"
-#include "../src/calendar/Calendar.c"
+#include "../src/calendar/Calendar1.h"
+#include "../src/calendar/Calendar1.c"
 
 
 template<typename T, size_t size>

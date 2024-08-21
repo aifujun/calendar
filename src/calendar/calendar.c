@@ -862,6 +862,7 @@ int get_date_info(DATE_INFO *date, int year, unsigned short month, unsigned shor
             gre_date.year = year;
             gre_date.month = month;
             gre_date.day = day;
+            gre_date.leap_flag = is_leap_year(year);
             gregorian_to_lunar(&gre_date, &lunar_date);
             break;
         }

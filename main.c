@@ -67,7 +67,7 @@ int CalendarMainWidget(){
 
 int run_calendar() {
     DATE_INFO date_info = {0};
-    get_date_info(&date_info, 2023, 9, 22, GregorianCalendar, 0);
+    get_date_info(&date_info, 2024, 8, 21, GregorianCalendar, 0);
 
     printf("公元 %d年%.2d月%.2d日 %s 第%.2d周 今年第%d天\n农历: %s%s[%s]年 %s%s%s %s%s月 %s%s日\n",
            date_info.gregorian.year,
